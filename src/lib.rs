@@ -76,11 +76,7 @@ impl Passwd {
         let mut buf = Vec::with_capacity(getpw_r_size_max());
         let mut result = std::ptr::null_mut();
         unsafe {
-            libc::getpwuid_r(uid,
-                             &mut pwd,
-                             buf.as_mut_ptr(),
-                             buf.capacity(),
-                             &mut result);
+            libc::getpwuid_r(uid, &mut pwd, buf.as_mut_ptr(), buf.capacity(), &mut result);
         }
 
         if result.is_null() {
