@@ -4,6 +4,8 @@
 //! # Examples
 //!
 //! ```
+//! use passwd::Passwd;
+//!
 //! println!("{:?}", Passwd::from_name("root"));
 //! println!("{:?}", Passwd::from_uid(0));
 //! ```
