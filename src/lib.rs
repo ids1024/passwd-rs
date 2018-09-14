@@ -44,7 +44,12 @@ impl Passwd {
             password: CStr::from_ptr((*pwd).pw_passwd).to_str().unwrap().to_owned(),
             uid: (*pwd).pw_uid,
             gid: (*pwd).pw_gid,
+
+            #[cfg(not(target_os = "android"))]
             gecos: CStr::from_ptr((*pwd).pw_gecos).to_str().unwrap().to_owned(),
+            #[cfg(target_os = "android")]
+            gecos: String::new(),
+
             home_dir: CStr::from_ptr((*pwd).pw_dir).to_str().unwrap().to_owned(),
             shell: CStr::from_ptr((*pwd).pw_shell).to_str().unwrap().to_owned(),
         }
