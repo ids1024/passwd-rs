@@ -45,6 +45,10 @@ impl Passwd {
             uid: (*pwd).pw_uid,
             gid: (*pwd).pw_gid,
 
+            // On 32-bit Andrid, this struct lacks the pw_gecos field; with
+            // a #define for compatability. On 64-bit, it's there, but
+            // always NULL.
+            // https://android.googlesource.com/platform/bionic/+/master/libc/include/pwd.h
             #[cfg(not(target_os = "android"))]
             gecos: CStr::from_ptr((*pwd).pw_gecos).to_str().unwrap().to_owned(),
             #[cfg(target_os = "android")]
