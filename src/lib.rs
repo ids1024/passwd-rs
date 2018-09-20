@@ -38,24 +38,24 @@ pub struct Passwd {
 }
 
 impl Passwd {
-    unsafe fn from_ptr(pwd: *const libc::passwd) -> Passwd {
+    unsafe fn from_libc(pwd: &libc::passwd) -> Passwd {
         Passwd {
-            name: CStr::from_ptr((*pwd).pw_name).to_str().unwrap().to_owned(),
-            password: CStr::from_ptr((*pwd).pw_passwd).to_str().unwrap().to_owned(),
-            uid: (*pwd).pw_uid,
-            gid: (*pwd).pw_gid,
+            name: CStr::from_ptr(pwd.pw_name).to_str().unwrap().to_owned(),
+            password: CStr::from_ptr(pwd.pw_passwd).to_str().unwrap().to_owned(),
+            uid: pwd.pw_uid,
+            gid: pwd.pw_gid,
 
             // On 32-bit Andrid, this struct lacks the pw_gecos field; with
             // a #define for compatability. On 64-bit, it's there, but
             // always NULL.
             // https://android.googlesource.com/platform/bionic/+/master/libc/include/pwd.h
             #[cfg(not(target_os = "android"))]
-            gecos: CStr::from_ptr((*pwd).pw_gecos).to_str().unwrap().to_owned(),
+            gecos: CStr::from_ptr(pwd.pw_gecos).to_str().unwrap().to_owned(),
             #[cfg(target_os = "android")]
             gecos: String::new(),
 
-            home_dir: CStr::from_ptr((*pwd).pw_dir).to_str().unwrap().to_owned(),
-            shell: CStr::from_ptr((*pwd).pw_shell).to_str().unwrap().to_owned(),
+            home_dir: CStr::from_ptr(pwd.pw_dir).to_str().unwrap().to_owned(),
+            shell: CStr::from_ptr(pwd.pw_shell).to_str().unwrap().to_owned(),
         }
     }
 
@@ -72,12 +72,7 @@ impl Passwd {
                              buf.as_mut_ptr(),
                              buf.capacity(),
                              &mut result);
-        }
-
-        if result.is_null() {
-            None
-        } else {
-            Some(unsafe { Passwd::from_ptr(result) })
+            result.as_ref().map(|p| Passwd::from_libc(p))
         }
     }
 
@@ -88,12 +83,7 @@ impl Passwd {
         let mut result = std::ptr::null_mut();
         unsafe {
             libc::getpwuid_r(uid, &mut pwd, buf.as_mut_ptr(), buf.capacity(), &mut result);
-        }
-
-        if result.is_null() {
-            None
-        } else {
-            Some(unsafe { Passwd::from_ptr(result) })
+            result.as_ref().map(|p| Passwd::from_libc(p))
         }
     }
 }
